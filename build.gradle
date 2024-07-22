@@ -17,7 +17,7 @@ subprojects {
     apply plugin: "com.diffplug.eclipse.apt"
     apply plugin: "checkstyle"
 
-    group "com.uberall"
+    group "com.github.peh"
     version libVersion
 
     repositories {

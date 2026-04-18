@@ -5,7 +5,6 @@ import com.uberall.models.Lock;
 import com.uberall.repositories.DistributedLockRepository;
 import io.micronaut.data.exceptions.DataAccessException;
 import jakarta.inject.Inject;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Optional;
 
 public class MicronautDataJdbcLockService implements LockService {
@@ -33,10 +32,9 @@ public class MicronautDataJdbcLockService implements LockService {
         try {
             distributedLockRepository.save(new DistributedLock(lock.getName(), lock.getUntil()));
         } catch (DataAccessException e) {
-            if (e.getCause() instanceof SQLIntegrityConstraintViolationException) {
-                throw new DistributedLockCreationException(lock.getName(), e);
-            }
-            throw e;
+            // Any DataAccessException during lock acquisition (constraint violation, deadlock, etc.)
+            // means another instance is competing for the same lock — treat as lock-already-taken.
+            throw new DistributedLockCreationException(lock.getName(), e);
         }
     }
 
